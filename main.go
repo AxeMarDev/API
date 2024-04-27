@@ -28,13 +28,11 @@ func getPeople(c *gin.Context) {
 
 func addPerson(c *gin.Context) {
 	var newPerson Person
-
 	if err := c.BindJSON(&newPerson); err != nil {
 		return
 	}
 	People = append(People, newPerson)
 	c.IndentedJSON(http.StatusCreated, newPerson)
-
 }
 
 func main() {
