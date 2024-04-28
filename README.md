@@ -6,3 +6,10 @@ This endevor has inspired me to explore how i can leverage the skills i picked u
 # description
 
 This API is will hold JSON objects of people in server side memory. There is a REACT.ts project within the project files to visualize the API.
+
+# Technologies
+
+- Using Golang for the api backend server. 
+- Using Gin package for routing and http. 
+- React.ts vite for frontend
+- Tailwinds for styling
