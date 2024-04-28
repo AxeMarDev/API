@@ -1,33 +1,37 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import API, {tPeople, tPerson} from './api/API.tsx'
+import {useEffect, useState} from "react";
+
+const PersonCard = (person:tPerson) =>{
+    return(
+        <div className={"bg-white p-5 rounded-lg"}>
+            <p>{person.firstname}</p>
+        </div>
+    )
+}
 
 function App() {
-  const [count, setCount] = useState(0)
+
+    const [people, setPeople] = useState<tPeople>([])
+
+    useEffect(() => {
+        API.getPeople().then((response)=>{
+            console.log(response)
+            setPeople(response.resp)
+        });
+
+    }, []);
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <div className={"flex flex-col bg-gray-200 h-screen"}>
+          <div className={"bg-blue-500 w-screen h-14 grid content-center pl-10"}>
+              <p className={"text-xl text-white"}> People database </p>
+          </div>
+          <div className={"p-10 flex flex-col gap-2"}>
+              {people.map((person:tPerson)=> PersonCard(person) )}
+          </div>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
   )
 }

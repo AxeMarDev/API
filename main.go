@@ -3,8 +3,10 @@ package main
 //https://pkg.go.dev/github.com/gin-gonic/gin#Context.BindJSON for documentation
 
 import (
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"time"
 )
 
 // Person : upper case members can be seen outside the file
@@ -37,6 +39,16 @@ func addPerson(c *gin.Context) {
 
 func main() {
 	router := gin.Default()
+
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
+
 	router.GET("/people", getPeople)  // to request run 'curl http://localhost:8080/people' on termial
 	router.POST("/people", addPerson) // to request run 'curl http://localhost:8080/people' on termial
 	router.Run("localhost:8080")
