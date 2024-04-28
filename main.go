@@ -3,6 +3,7 @@ package main
 //https://pkg.go.dev/github.com/gin-gonic/gin#Context.BindJSON for documentation
 
 import (
+	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -31,6 +32,7 @@ func getPeople(c *gin.Context) {
 func addPerson(c *gin.Context) {
 	var newPerson Person
 	if err := c.BindJSON(&newPerson); err != nil {
+		fmt.Println(err)
 		return
 	}
 	People = append(People, newPerson)

@@ -25,10 +25,39 @@ const   getPeople = async () =>{
 
     return value
 }
+
+const   addPerson = async (person:tPerson) =>{
+
+    let value : { resp : tPeople } = {resp: []}
+
+    const url = `http://localhost:8080/people`;
+
+    await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(person)
+    })
+        .then((response)=> response.json() )
+        .then((data) => {
+            console.log(data)
+            value = { resp: data }
+        })
+        .catch((error) => {
+            console.error(error);
+        });
+
+
+    return value
+}
 export default class API{
 
     static getPeople(){
         return getPeople()
+    }
+    static  addPerson( person:tPerson ){
+        return addPerson(person)
     }
 
 }
