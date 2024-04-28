@@ -1,16 +1,18 @@
 package main
 
-//https://pkg.go.dev/github.com/gin-gonic/gin#Context.BindJSON for documentation
-
 import (
+	"database/sql"
 	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
+	"log"
 	"net/http"
+	"os"
 	"time"
 )
 
-// Person : upper case members can be seen outside the file
 type Person struct {
 	ID        string `json:"id"`
 	Firstname string `json:"firstname"`
@@ -18,28 +20,87 @@ type Person struct {
 	Team      int    `json:"team"`
 }
 
-var People = []Person{
-	{ID: "1", Firstname: "Axell", Lastname: "Martinez", Team: 1},
-	{ID: "2", Firstname: "Kaycee", Lastname: "Menchaca", Team: 1},
-	{ID: "3", Firstname: "Andrik", Lastname: "Martinez", Team: 2},
+var db *sql.DB
+
+func initDB() {
+	//myuser
+	//"user=axellmartinez dbname=mydb  host=localhost port=5432 sslmode=disable"
+	err1 := godotenv.Load() // This will look for the .env file in the current directory
+	if err1 != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	dbpath := fmt.Sprintf("user=%s dbname=%s host=%s port=%s sslmode=%s",
+		os.Getenv("DBUSER"),
+		os.Getenv("DBNAME"),
+		os.Getenv("DBHOST"),
+		os.Getenv("DBPORT"),
+		os.Getenv("DBSSL"))
+
+	fmt.Println(dbpath)
+
+	connStr := dbpath //"user=axellmartinez dbname=mydb  host=localhost port=5432 sslmode=disable"
+	var err error
+	db, err = sql.Open("postgres", connStr)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err = db.Ping(); err != nil {
+		log.Fatal(err)
+	}
 }
 
-// this is a function that will get routed too when a GET request to route /People
-func getPeople(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, People)
-}
-
+// addPerson adds a new person to the database from a JSON request
 func addPerson(c *gin.Context) {
 	var newPerson Person
-	if err := c.BindJSON(&newPerson); err != nil {
-		fmt.Println(err)
+
+	// Bind the received JSON to newPerson
+	if err := c.ShouldBindJSON(&newPerson); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	People = append(People, newPerson)
-	c.IndentedJSON(http.StatusCreated, newPerson)
+
+	// Insert newPerson into the database
+	query := `INSERT INTO people (firstname, lastname, team) VALUES ($1, $2, $3) RETURNING id`
+	var id int
+	err := db.QueryRow(query, newPerson.Firstname, newPerson.Lastname, newPerson.Team).Scan(&id)
+
+	if err != nil {
+		log.Printf("Error while inserting new person: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add new person"})
+		return
+	}
+
+	// Return the new person as JSON
+	c.JSON(http.StatusCreated, newPerson)
+}
+
+func getPeople(c *gin.Context) {
+	rows, err := db.Query("SELECT id, firstname, lastname, team FROM people")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query people"})
+		return
+	}
+	defer rows.Close()
+
+	var people []Person
+	for rows.Next() {
+		var p Person
+		if err := rows.Scan(&p.ID, &p.Firstname, &p.Lastname, &p.Team); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan person"})
+			return
+		}
+		people = append(people, p)
+	}
+
+	c.IndentedJSON(http.StatusOK, people)
 }
 
 func main() {
+	initDB()
+	defer db.Close()
+
 	router := gin.Default()
 
 	router.Use(cors.New(cors.Config{
@@ -51,7 +112,7 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}))
 
-	router.GET("/people", getPeople)  // to request run 'curl http://localhost:8080/people' on termial
-	router.POST("/people", addPerson) // to request run 'curl http://localhost:8080/people' on termial
+	router.GET("/people", getPeople)
+	router.POST("/people", addPerson)
 	router.Run("localhost:8080")
 }

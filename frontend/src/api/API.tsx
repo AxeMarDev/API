@@ -15,11 +15,17 @@ const   getPeople = async () =>{
     })
         .then((response)=> response.json() )
         .then((data) => {
-            console.log(data)
-            value = { resp: data }
+            console.log(data.error)
+            if ( data.error){
+                value = { resp: [] }
+            } else{
+                value = { resp: data }
+            }
+
         })
         .catch((error) => {
             console.error(error);
+            value = { resp: [] }
         });
 
 
