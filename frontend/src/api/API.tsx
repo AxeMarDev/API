@@ -57,6 +57,33 @@ const   addPerson = async (person:tPerson) =>{
 
     return value
 }
+
+const deletePerson = async (id:string) =>{
+
+    let value : { resp : tPeople } = {resp: []}
+
+    const url = `http://localhost:8080/people?id=${+id}`;
+
+    await fetch(url, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+        .then((response)=> response.json() )
+        .then((data) => {
+            console.log(data)
+            value = { resp: data }
+        })
+        .catch((error) => {
+            console.error(error);
+        });
+
+
+    return value
+}
+
+
 export default class API{
 
     static getPeople(){
@@ -64,6 +91,9 @@ export default class API{
     }
     static  addPerson( person:tPerson ){
         return addPerson(person)
+    }
+    static  deletePerson(id:string){
+        return deletePerson(id)
     }
 
 }

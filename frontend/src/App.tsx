@@ -20,6 +20,7 @@ function App() {
             setPeople(response.resp)
         });
         setMenuControlFlag(0)
+
     }, [reloadList]);
 
     const screenOptions:ReactNode[] = [

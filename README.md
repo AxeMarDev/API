@@ -18,3 +18,17 @@ This API will interface with db of people objects. The server will use a postgre
 # How to run
 
 
+# Migrations
+
+using goose cli, under dir db/migrations
+to install run 
+
+```go install github.com/pressly/goose/v3/cmd/goose@latest ```
+
+and add to path
+
+```export PATH=$PATH:$(go env GOPATH)/bin```
+
+To apply migration to database run
+
+``` goose -dir db/migrations postgres "user=usernmae dbname=databaseame host=hostname port=portnum sslmode=disable" up```

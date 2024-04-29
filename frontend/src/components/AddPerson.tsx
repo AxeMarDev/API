@@ -11,9 +11,11 @@ export default function AddPerson( flag:number, setReloadFlag:Dispatch<React.Set
             <input placeholder={"first name"} type={"text"} value={field.firstname} onChange={(e)=>setField( {...field, firstname: e.target.value} )} />
             <input placeholder={"last name"} type={"text"} value={field.lastname} onChange={(e)=>setField( {...field, lastname: e.target.value} )} />
             <button onClick={()=>{
-                API.addPerson(field)
-                setReloadFlag(flag+1)
-                setField({id:"",firstname:"", lastname:"", team:0})
+                API.addPerson(field).then(()=>{
+                    setReloadFlag(flag+1)
+                    setField({id:"",firstname:"", lastname:"", team:0})
+                })
+
             }}>add to list</button>
         </div>
 
