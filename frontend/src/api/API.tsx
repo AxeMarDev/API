@@ -1,17 +1,21 @@
 
 export type tPerson = {id:string, firstname:string, lastname:string, team:number}
 export type tPeople = [tPerson] | [];
-const   getPeople = async () =>{
+
+
+const GET = async ( route:string, params:Record<string, string> ) =>{
 
     let value : { resp : tPeople } = {resp: []}
 
-    const url = `http://localhost:8080/people`;
+    const queryParams = new URLSearchParams(params);
+
+    const url = `http://localhost:8080${route}?${queryParams}`;
 
     await fetch(url, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-        }
+        },
     })
         .then((response)=> response.json() )
         .then((data) => {
@@ -32,18 +36,22 @@ const   getPeople = async () =>{
     return value
 }
 
-const   addPerson = async (person:tPerson) =>{
+const POST = async ( route:string, params:Record<string, string>, data:BodyInit) =>{
 
     let value : { resp : tPeople } = {resp: []}
 
-    const url = `http://localhost:8080/people`;
+    const queryParams = new URLSearchParams(params)
+
+    const url = `http://localhost:8080${route}?${queryParams}`;
+
 
     await fetch(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(person)
+        body: data
+
     })
         .then((response)=> response.json() )
         .then((data) => {
@@ -58,17 +66,20 @@ const   addPerson = async (person:tPerson) =>{
     return value
 }
 
-const deletePerson = async (id:string) =>{
+const DELETE = async ( route:string, params:Record<string, string>, data:BodyInit) =>{
 
     let value : { resp : tPeople } = {resp: []}
 
-    const url = `http://localhost:8080/people?id=${+id}`;
+    const queryParams = new URLSearchParams(params)
+
+    const url = `http://localhost:8080${route}?${queryParams}`;
 
     await fetch(url, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
-        }
+        },
+        body: data
     })
         .then((response)=> response.json() )
         .then((data) => {
@@ -83,6 +94,24 @@ const deletePerson = async (id:string) =>{
     return value
 }
 
+const   getPeople = async () =>{
+
+    return GET( "/people",{})
+
+}
+
+const addPerson = async (person:tPerson) =>{
+
+    return POST('/people', {}, JSON.stringify(person) )
+
+}
+
+const deletePerson = async (id:string) =>{
+
+    return DELETE("/people", {id: id}, "")
+}
+
+export {getPeople, addPerson, deletePerson}
 
 export default class API{
 
